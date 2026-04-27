@@ -1,6 +1,8 @@
 const express = require('express');
+const auth = require('../middleware/auth');
 const router = express.Router();
 const { Log } = require('../database/setup');
+
 
 // GET all logs
 router.get('/', async (req, res) => {
@@ -15,6 +17,7 @@ router.get('/', async (req, res) => {
     }
 });
 
+
 // GET log by ID
 router.get('/:id', async (req, res) => {
     try {
@@ -26,7 +29,14 @@ router.get('/:id', async (req, res) => {
             });
         }
 
+        if (log.userId !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({
+                error: 'Not authorized to view this log'
+            });
+        }
+
         res.json(log);
+
     } catch (err) {
         res.status(500).json({
             error: 'Database error while fetching log',
@@ -35,28 +45,37 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+
 // CREATE log
 router.post('/', async (req, res) => {
-  try {
-    const { userId, exerciseId, duration, date} = req.body;
+    console.log("LOG BODY:", req.body);
+    try {
+        const { userId, exerciseId, duration, date } = req.body;
 
-    if (!userId || !exerciseId || !duration || !date) {
-      return res.status(400).json({
-        error: 'userId, exerciseId, duration, and date are required'
-      });
+        if (!userId || !exerciseId || !duration || !date) {
+            return res.status(400).json({
+                error: 'userId, exerciseId, duration, and date are required'
+            });
+        }
+
+        const log = await Log.create({
+            userId,
+            exerciseId,
+            duration,
+            date: new Date(date)
+        });
+
+        return res.status(201).json(log);
+
+    } catch (err) {
+        console.log("ERROR", err);
+        return res.status(500).json({
+            error: 'Failed to create log',
+            details: err.message
+        });
     }
-
-    const log = await Log.create(req.body);
-
-    res.status(201).json(log);
-
-  } catch (err) {
-    res.status(500).json({
-        error: 'Failed to create log',
-        details: err.message
-    });
-  }
 });
+
 
 // UPDATE log
 router.put('/:id', async (req, res) => {
@@ -69,12 +88,19 @@ router.put('/:id', async (req, res) => {
             });
         }
 
+        if (log.userId !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({
+                error: 'Not authorized to update this log'
+            });
+        }
+
         await log.update(req.body);
 
         res.json({
             message: 'Log updated successfully',
             log
         });
+
     } catch (err) {
         res.status(500).json({
             error: 'Failed to update log',
@@ -82,6 +108,7 @@ router.put('/:id', async (req, res) => {
         });
     }
 });
+
 
 // DELETE log
 router.delete('/:id', async (req, res) => {
@@ -94,12 +121,18 @@ router.delete('/:id', async (req, res) => {
             });
         }
 
+        if (log.userId !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({
+                error: 'Not authorized to delete this log'
+            });
+        }
+
         await log.destroy();
-        
-        res.json({ 
+
+        res.json({
             message: 'Log deleted successfully'
         });
-    
+
     } catch (err) {
         res.status(500).json({
             error: 'Failed to delete log',

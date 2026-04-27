@@ -3,7 +3,8 @@ const { Sequelize } = require('sequelize');
 // Create Sequelize (SQLite database)
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: './database/database.sqlite'
+    storage: './database/database.sqlite',
+    logging: false
 });
 
 // Import Models
@@ -27,3 +28,5 @@ module.exports = {
     Exercise,
     Log
 }
+
+sequelize.sync({ force: false });

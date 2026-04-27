@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../setup');
 
 module.exports = (sequelize) => {
     return sequelize.define('Log', {
@@ -8,19 +7,21 @@ module.exports = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        exerciseId: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
         duration: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        repetitions: {
-            type: DataTypes.INTEGER
-        },
         date: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false
-        },
-        notes: {
-            type: DataTypes.TEXT
         }
     });
 };

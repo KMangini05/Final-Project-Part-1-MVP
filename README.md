@@ -6,6 +6,8 @@ The Exercise Tracker API is a backend RESTful service that allows users to track
 
 This project demonstrates backend development skills using Node.js, Express, Sequelize, and SQLite, including middleware, error handling, and testing.
 
+---
+
 ## Features
 
 - Full CRUD operations for Users, Exercises, and Logs
@@ -14,6 +16,8 @@ This project demonstrates backend development skills using Node.js, Express, Seq
 - RESTful API design
 - Logging middleware
 - Basic unit testing using Jest and Supertest
+
+---
 
 ## Tech Stack
 
@@ -25,6 +29,8 @@ This project demonstrates backend development skills using Node.js, Express, Seq
 - Supertest
 - CORS
 - dotenv
+
+---
 
 ## Setup Instructions
 
@@ -51,6 +57,8 @@ npm run dev
 
 Server runs at:
 http://localhost:3000
+
+---
 
 ## API Endpoints
 
@@ -107,6 +115,8 @@ http://localhost:3000
 "date": "2026-01-01"
 }
 
+---
+
 ## Error Handling
 
 All errors are returned in JSON format.
@@ -128,6 +138,21 @@ All errors are returned in JSON format.
 {
 "error": "Internal server error"
 }
+
+---
+
+## Code Review Improvements
+
+All feedback from the MVP submission have been addressed:
+
+- Fixed server export issue to support Jest testing
+- Corrected route handler typos (req -> res)
+- Improved error handling with consistent HTTP responses
+- Fixed foreign key issues in log creation tests
+- Improved code structure by separating middleware
+- Removed unused and incorrect imports from route files
+
+---
 
 ## Testing
 
@@ -159,6 +184,8 @@ Include:
 - POST requests
 - PUT requests
 - DELETE requests
+
+---
 
 ## Author
 

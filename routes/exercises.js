@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { Exercise } = require('../database/setup');
-const { defaultMaxListeners } = require('supertest/lib/test');
+
+// middleware
+const auth = require('../middleware/auth');
+const adminOnly = require('../middleware/roles')('admin');
+
 
 // GET all exercises
 router.get('/', async (req, res) => {
@@ -9,12 +13,13 @@ router.get('/', async (req, res) => {
         const data = await Exercise.findAll();
         res.json(data);
     } catch (err) {
-        req.status(500).json({
+        res.status(500).json({
             error: 'Failed to fetch exercises',
             details: err.message
         });
     }
 });
+
 
 // GET exercise by ID
 router.get('/:id', async (req, res) => {
@@ -22,8 +27,8 @@ router.get('/:id', async (req, res) => {
         const item = await Exercise.findByPk(req.params.id);
 
         if (!item) {
-            return res.status(404).json({ 
-                error: 'Exercise not found' 
+            return res.status(404).json({
+                error: 'Exercise not found'
             });
         }
 
@@ -36,30 +41,40 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// CREATE exercise
-router.post('/', async (req, res) => {
-  try {
-    const { name, category } = req.body;
 
-    if (!name || !category) {
-        return res.status(400).json({
-            error: 'Name and category are required'
+// CREATE exercise 
+router.post('/', async (req, res) => {
+    try {
+        const { name, category } = req.body;
+
+        if (!name || !category) {
+            return res.status(400).json({
+                error: 'Name and category are required'
+            });
+        }
+
+        const exercise = await Exercise.create({
+            name,
+            category
+        });
+
+        res.status(201).json({
+            id: exercise.id,
+            name: exercise.name,
+            category: exercise.category
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            error: 'Failed to create exercise',
+            details: err.message
         });
     }
-    const item = await Exercise.create(req.body);
-
-    res.status(201).json(item);
-
-  } catch (err) {
-    res.status(500).json({ 
-        error: 'Failed to create exercise',
-        details: err.message 
-    });
-  }
 });
 
-// UPDATE exercise
-router.put('/:id', async (req, res) => {
+
+// UPDATE exercise 
+router.put('/:id', auth, adminOnly, async (req, res) => {
     try {
         const item = await Exercise.findByPk(req.params.id);
 
@@ -67,24 +82,26 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({
                 error: 'Exercise not found'
             });
-  }
+        }
 
-  await item.update(req.body);
+        await item.update(req.body);
 
-  res.json({
-    message: 'Exercise updated successfully',
-    exercise: item
-  });
- } catch (err) {
-    res.status(500).json({
-        error: 'Failed to update exercise',
-        details: err.message
-    });
- }
+        res.json({
+            message: 'Exercise updated successfully',
+            exercise: item
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            error: 'Failed to update exercise',
+            details: err.message
+        });
+    }
 });
 
-// DELETE exercise
-router.delete('/:id', async (req, res) => {
+
+// DELETE exercise 
+router.delete('/:id', auth, adminOnly, async (req, res) => {
     try {
         const item = await Exercise.findByPk(req.params.id);
 
@@ -95,7 +112,8 @@ router.delete('/:id', async (req, res) => {
         }
 
         await item.destroy();
-        req.json({
+
+        res.json({
             message: 'Exercise deleted successfully'
         });
 
@@ -106,5 +124,6 @@ router.delete('/:id', async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;
